@@ -1,0 +1,114 @@
+service: course-booking-serverless
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: ap-southeast-1
+  architecture: arm64
+  memorySize: 768
+  timeout: 15
+
+custom:
+  bundle:
+    linting: false
+
+functions:
+  courseBookingAuth:
+    handler: src/handlers/auth/courseBookingAuth.default
+  signup:
+    handler: src/handlers/auth/signup.default
+    events:
+      - http:
+          method: POST
+          path: /signup
+  login:
+    handler: src/handlers/auth/login.default
+    events:
+      - http:
+          method: POST
+          path: /login
+  checkEmail:
+    handler: src/handlers/auth/checkEmail.default
+    events:
+      - http:
+          method: POST
+          path: /check-email
+  getUserDetails:
+    handler: src/handlers/user-api/getUserDetails.default
+    events:
+      - http:
+          method: GET
+          path: /user
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  enroll:
+    handler: src/handlers/user-api/enroll.default
+    events:
+      - http:
+          method: POST
+          path: /enroll/{courseId}
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  addCourse:
+    handler: src/handlers/course-api/addCourse.default
+    events:
+      - http:
+          method: POST
+          path: /course
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  updateCourse:
+    handler: src/handlers/course-api/updateCourse.default
+    events:
+      - http:
+          method: PUT
+          path: /course/{coureseId}
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  getCourse:
+    handler: src/handlers/course-api/getCourse.default
+    events:
+      - http:
+          method: GET
+          path: /course/{coureseId}
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  getAllCourses:
+    handler: src/handlers/course-api/getAllCourses.default
+    events:
+      - http:
+          method: GET
+          path: /all-courses
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  getActiveCourses:
+    handler: src/handlers/course-api/getActiveCourses.default
+    events:
+      - http:
+          method: GET
+          path: /courses
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  archiveCourse:
+    handler: src/handlers/course-api/archiveCourse.default
+    events:
+      - http:
+          method: PATCH
+          path: /course/{coureseId}
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-esbuild
+  - serverless-offline

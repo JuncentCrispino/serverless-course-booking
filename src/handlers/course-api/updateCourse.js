@@ -2,10 +2,10 @@ import Course from '../../models/Course';
 import response from '../../response';
 import sanitizer from '../../utils/sanitizer';
 import connect from '../../config/db';
-connect();
 
 export default async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
+  await connect();
   try {
     const { name, description, instructor, schedule, availableSlots, price } = JSON.parse(event.body);
     const { courseId } = event.pathParameters;

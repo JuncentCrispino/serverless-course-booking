@@ -1,10 +1,10 @@
 import User from '../../models/User';
 import response from '../../response';
 import connect from '../../config/db';
-connect();
 
 export default async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
+  await connect();
   try {
     const email = JSON.parse(event.body).email;
     const user = await User.isEmailTaken(email);

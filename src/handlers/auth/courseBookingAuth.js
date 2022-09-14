@@ -1,21 +1,21 @@
-import jwt from 'jsonwebtoken';
+import { verify, TokenExpiredError } from 'jsonwebtoken';
 
-export default async function (r, c, cb) {
-  let token = r.authorizationToken;
+export default async function (event, context, callback) {
+  let token = event.authorizationToken;
   if (!token) {
-    return cb(null, 'JWT not authorized');
+    callback(null, generatePolicy('user', 'Deny', event.methodArn));
   }
   if (token.includes('Bearer ')) {
     token = token.substring(7, token.length);
   }
-  jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, decoded) => {
+  verify(token, process.env.JWT_ACCESS_SECRET, (err, decoded) => {
     if (err) {
-      if (err instanceof jwt.TokenExpiredError) {
-        return cb('Unauthorized');
+      if (err instanceof TokenExpiredError) {
+        callback('Unauthorized');
       }
-      return cb(null, 'JWT not authorized');
+      callback(null, generatePolicy('user', 'Deny', event.methodArn));
     }
-    return cb(null, generatePolicy(decoded.userId, 'Allow', r.methodArn));
+    callback(null, generatePolicy(decoded.userId, 'Allow', event.methodArn));
   });
 }
 const generatePolicy = (principalId, effect, resource) => {

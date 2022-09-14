@@ -3,10 +3,10 @@ import response from '../../response';
 import connect from '../../config/db';
 import { generateAccessToken, generateRefreshToken, createNewToken } from '../../services/token';
 import sanitizer from '../../utils/sanitizer';
-connect();
 
 export default async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
+  await connect();
   try {
     const { email, password } = JSON.parse(event.body);
     let user = await User.findOne({ email }).exec();

@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import toJSON from './plugins/toJSON.plugin';
 import paginate from './plugins/paginate.plugin';
 
-const userSchema = mongoose.Schema({
+const userSchema = Schema({
   firstName: {
     type: String,
     required: [true, 'First name is required'],
@@ -33,9 +33,12 @@ const userSchema = mongoose.Schema({
     type: Boolean,
     default: false
   },
-  mobileNo: {
+  phone: {
     type: String,
     required: [true, 'Mobile No. is required']
+  },
+  address: {
+    type: String
   },
   enrollments: [
     {
@@ -61,12 +64,12 @@ userSchema.plugin(toJSON);
 userSchema.plugin(paginate);
 
 userSchema.statics.isEmailTaken = async function (email, userId) {
-  const user = await this.findOne({ email, _id: { $ne: mongoose.Types.ObjectId(userId) } }).exec();
+  const user = await this.findOne({ email, _id: { $ne: Types.ObjectId(userId) } }).exec();
   return !!user;
 };
 
-userSchema.statics.isMobileNoTaken = async function (mobileNo, userId) {
-  const user = await this.findOne({ mobileNo, _id: { $ne: mongoose.Types.ObjectId(userId) } }).exec();
+userSchema.statics.isMobileNoTaken = async function (phone, userId) {
+  const user = await this.findOne({ phone, _id: { $ne: Types.ObjectId(userId) } }).exec();
   return !!user;
 };
 
@@ -83,4 +86,4 @@ userSchema.pre('save', async function (next) {
   next;
 });
 
-export default mongoose.model('User', userSchema);
+export default model('User', userSchema);

@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 import toJSON from './plugins/toJSON.plugin';
 import paginate from './plugins/paginate.plugin';
 
-const courseSchema = mongoose.Schema({
+const courseSchema = Schema({
   name: {
     type: String,
     required: [true, 'Course is required']
@@ -15,10 +15,10 @@ const courseSchema = mongoose.Schema({
     type: String, 
     required: [true, 'instuctor is required']
   },
-  schedule: {
+  schedule: [{
     type: String,
     required: [true, 'Schedule is required']
-  },
+  }],
   availableSlots: {
     type: Number,
     required: [true, 'Available slots is required']
@@ -51,7 +51,7 @@ courseSchema.plugin(toJSON);
 courseSchema.plugin(paginate);
 
 courseSchema.statics.isNameTaken = async function (name, courseId) {
-  const course = await this.findOne({ name, _id: { $ne: mongoose.Types.ObjectId(courseId) } }).exec();
+  const course = await this.findOne({ name, _id: { $ne: Types.ObjectId(courseId) } }).exec();
   return !!course;
 };
 
@@ -60,4 +60,4 @@ courseSchema.statics.isEnrolled = async function (courseId,userId) {
   return !!course;
 };
 
-export default mongoose.model('Course', courseSchema);
+export default model('Course', courseSchema);

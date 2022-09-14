@@ -10,9 +10,12 @@ provider:
   memorySize: 768
   timeout: 15
 
-custom:
-  bundle:
-    linting: false
+package:
+  individually: true
+
+# custom:
+#   bundle:
+#     linting: false
 
 functions:
   courseBookingAuth:
@@ -23,24 +26,45 @@ functions:
       - http:
           method: POST
           path: /signup
+          cors: true
   login:
     handler: src/handlers/auth/login.default
     events:
       - http:
           method: POST
           path: /login
+          cors: true
+  logout:
+    handler: src/handlers/auth/logout.default
+    events:
+      - http:
+          method: POST
+          path: /logout
+          cors: true
+          authorizer: 
+            name: courseBookingAuth
+            resultTtlInSeconds: 0
+  refreshAccessToken:
+    handler: src/handlers/auth/refreshAccessToken.default
+    events:
+      - http:
+          method: POST
+          path: /refresh-access-token
+          cors: true
   checkEmail:
     handler: src/handlers/auth/checkEmail.default
     events:
       - http:
           method: POST
           path: /check-email
+          cors: true
   getUserDetails:
     handler: src/handlers/user-api/getUserDetails.default
     events:
       - http:
           method: GET
           path: /user
+          cors: true
           authorizer: 
             name: courseBookingAuth
             resultTtlInSeconds: 0
@@ -50,15 +74,21 @@ functions:
       - http:
           method: POST
           path: /enroll/{courseId}
+          cors: true
           authorizer: 
             name: courseBookingAuth
             resultTtlInSeconds: 0
+          request:
+            parameters:
+              paths:
+                courseId: true
   addCourse:
     handler: src/handlers/course-api/addCourse.default
     events:
       - http:
           method: POST
           path: /course
+          cors: true
           authorizer: 
             name: courseBookingAuth
             resultTtlInSeconds: 0
@@ -67,34 +97,47 @@ functions:
     events:
       - http:
           method: PUT
-          path: /course/{coureseId}
+          path: /course/{courseId}
+          cors: true
           authorizer: 
             name: courseBookingAuth
             resultTtlInSeconds: 0
+          request:
+            parameters:
+              paths:
+                courseId: true
   getCourse:
     handler: src/handlers/course-api/getCourse.default
     events:
       - http:
           method: GET
-          path: /course/{coureseId}
-          authorizer: 
-            name: courseBookingAuth
-            resultTtlInSeconds: 0
+          path: /course/{courseId}
+          cors: true
+          request:
+            parameters:
+              paths:
+                courseId: true
   getAllCourses:
     handler: src/handlers/course-api/getAllCourses.default
     events:
       - http:
           method: GET
           path: /all-courses
-          authorizer: 
-            name: courseBookingAuth
-            resultTtlInSeconds: 0
+          cors: true
   getActiveCourses:
     handler: src/handlers/course-api/getActiveCourses.default
     events:
       - http:
           method: GET
           path: /courses
+          cors: true
+  getEnrolledCourses:
+    handler: src/handlers/course-api/getEnrolledCourses.default
+    events:
+      - http:
+          method: GET
+          path: /enrolled-courses
+          cors: true
           authorizer: 
             name: courseBookingAuth
             resultTtlInSeconds: 0
@@ -103,12 +146,30 @@ functions:
     events:
       - http:
           method: PATCH
-          path: /course/{coureseId}
+          path: /course/status/{courseId}
+          cors: true
           authorizer: 
             name: courseBookingAuth
             resultTtlInSeconds: 0
+          request:
+            parameters:
+              paths:
+                courseId: true  
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
 
 plugins:
   - serverless-dotenv-plugin
+  # - serverless-bundle
   - serverless-esbuild
   - serverless-offline

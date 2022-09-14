@@ -3,15 +3,14 @@ import Course from '../../models/Course';
 import response from '../../response';
 import connect from '../../config/db';
 import { decodeJwt } from '../../utils/auth';
-import mongoose from 'mongoose';
-connect();
+import { startSession } from 'mongoose';
 
 export default async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
-  const session = await mongoose.startSession();
+  await connect();
+  const session = await startSession();
   session.startTransaction();
   try {
-    console.log(event.headers.Authorization);
     const { courseId } = event.pathParameters;
     let token = event.headers.Authorization;
     if (token.includes('Bearer')) {
@@ -45,6 +44,6 @@ export default async function(event, context) {
     await session.abortTransaction();
     return response(500, error);
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 }

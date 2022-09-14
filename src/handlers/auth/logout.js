@@ -1,14 +1,15 @@
 import User from '../../models/User';
 import response from '../../response';
 import connect from '../../config/db';
-import { decodeJwt } from '../../utils/auth';
-import sanitizer from '../../utils/sanitizer';
+import { decodeJwt }from '../../utils/auth';
+import Token from '../../models/Token';
 
 export default async function(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
   await connect();
   try {
     let token = event.headers.Authorization;
+    console.log(token);
     if (!token) {
       return response(403, { message: 'Unauthorized' });
     }
@@ -16,6 +17,7 @@ export default async function(event, context) {
       token = token.substring(7, token.length);
     }
     const payload = decodeJwt(token, process.env.JWT_ACCESS_SECRET);
+    console.log(payload);
     if (!payload) {
       return response(403, { message: 'Invalid token' });
     }
@@ -23,9 +25,11 @@ export default async function(event, context) {
     if (!user) {
       return response(404, { message: 'User not found' });
     }
-    sanitizer(user._doc);
-    return response(200, { ...user._doc });
+    await Token.find({ userId: user._id, type: 'refresh-token' }).deleteMany().exec();
+    return response(200, { message: 'Logged out successfully' });
   } catch (error) {
+    console.log(error);
     return response(500, error);
   }
+
 }

@@ -50,10 +50,11 @@ export async function createNewToken(user, hashToken, tokenType, expiration, ses
 }
 
 export async function findToken(token, type, secret) {
-  const payload = jwt.decodeJwt(token, secret);
+  const payload = jwt.verify(token, secret);
   if (!payload) {
     return null;
   }
   const tokenDoc = await Token.findOne({ token, type, userId: payload.userId }).exec();
+  console.log(tokenDoc);
   return tokenDoc;
 }

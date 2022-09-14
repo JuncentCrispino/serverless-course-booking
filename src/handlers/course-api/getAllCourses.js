@@ -2,10 +2,10 @@ import Course from '../../models/Course';
 import response from '../../response';
 import connect from '../../config/db';
 import pick from '../../utils/pick';
-connect();
 
 export default async function (event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
+  await connect();
   try {
     const query = (event.queryStringParameters);
     const options = pick(query, ['sortBy', 'limit', 'page']);

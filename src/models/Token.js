@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
+import { Schema, model, SchemaTypes } from 'mongoose';
 
-const tokenSchema = mongoose.Schema({
+const tokenSchema = Schema({
   token: {
     type: String,
     index: true,
     required: true
   },
   userId: {
-    type: mongoose.SchemaTypes.ObjectId,
+    type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true
   },
@@ -39,4 +39,4 @@ tokenSchema.index(
 );
 
 
-export default mongoose.model('Token', tokenSchema);
+export default model('Token', tokenSchema);

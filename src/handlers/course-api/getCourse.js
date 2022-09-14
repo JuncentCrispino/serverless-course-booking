@@ -2,10 +2,10 @@ import Course from '../../models/Course';
 import response from '../../response';
 import connect from '../../config/db';
 import sanitizer from '../../utils/sanitizer';
-connect();
 
 export default async function (event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
+  await connect();
   try {
     const courseId = event.pathParameters.courseId;
     const courses = await Course.findById(courseId).lean().exec();
